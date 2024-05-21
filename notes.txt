@@ -1,0 +1,80 @@
+// Tadeáš Vykopal, 3.B, PVA, Shadow Slayer
+
+  _________ __                  ___                    _________ __                                    
+ /   _____/|  |__  _____     __| _/  ____  __  _  __  /   _____/|  |  _____    ___ __   ____  _______  
+ \_____  \ |  |  \ \__  \   / __ |  /  _ \ \ \/ \/ /  \_____  \ |  |  \__  \  <   |  |_/ __ \ \_  __ \ 
+ /        \|   Y  \ / __ \_/ /_/ | (  <_> ) \     /   /        \|  |__ / __ \_ \___  |\  ___/  |  | \/ 
+/_______  /|___|  /(____  /\____ |  \____/   \/\_/   /_______  /|____/(____  / / ____| \___  > |__|    
+        \/      \/      \/      \/                           \/            \/  \/          \/          
+
+========================= SOURCES =========================
+used:
+escape animator hell: https://www.youtube.com/watch?v=nBkiSJ5z-hE
+animation: https://www.youtube.com/watch?v=hkaysu1Z-N8
+new input system: https://www.youtube.com/watch?v=Yjee_e4fICc
+tilemaps: https://www.youtube.com/watch?v=g83_gwEO0kM
+oneway platforms: https://www.youtube.com/watch?v=7rCUt6mqqE8
+ground check: https://www.youtube.com/watch?v=c3iEl5AwUF8
+acceleration: https://www.youtube.com/watch?v=KKGdDBFcu0Q
+overall enemies: https://www.youtube.com/watch?v=d002CljR-KU
+gif converter: https://tool.koalahollow.com/gifconverter
+
+will be used:
+jumps/walljumps!!!: https://www.youtube.com/watch?v=2S3g8CgBG1g
+save/load system: https://www.youtube.com/watch?v=XOjd_qU2Ido
+https://www.youtube.com/watch?v=yxzg8jswZ8A&list=PLgOEwFbvGm5o8hayFB6skAfa8Z-mw4dPV&index=8
+melee combat: https://www.youtube.com/watch?v=sPiVz1k-fEs
+overall enemies: https://www.youtube.com/watch?v=d002CljR-KU
+
+should be used:
+bettergame steps: https://www.youtube.com/watch?v=3y-ldI_xWiI
+excelent platformer: https://www.youtube.com/watch?v=Oet5jqoX14E
+adaptive difficulty: https://www.youtube.com/watch?v=rI7UxiEZbA4&list=PLqPLyUreLV8C59RyVDRESJtefspPi-eXq&index=45
+
+it exists, whatever:
+input system: https://www.youtube.com/watch?v=Pzd8NhcRzVo
+2D pathfinding AI: https://www.youtube.com/watch?v=jvtFUfJ6CP8&t
+
+========================= BUGS & MISTAKES THAT NEED FIX =========================
+- change camera from projection to perspective //ekšuly hard af
+- sometimes jump is doubled when jumping while running on a slope
+- tilemap hitbox is sloppy
+- jump is doubled when jumping through a one-way platform
+- camera focusing into wrong places
+- enemy is bugging
+
+========================= SCHMOOVEMENT =========================
+m&k:
+mouseLeft - attack with sword
+mouseLeft hold - charged attack (dash)
+mouseRight hold - aim with bow 
+mouseRight release - shoot the bow
+A - left
+D - right
+Space - jump
+S - (maybe sneak mechanic)
+E - interact
+Q - cast a spell
+F - heal
+Tab - inv
+Esc - pause
+
+========================= IDEAS =========================
+eldest souls style death screen
+deep secret script
+The main character is nameless
+The game starts with the main character arriving into a forest/cavern on a boat. Followed by tutorial-style section
+Shadow/light mechanic combined with spells - torches light up only once u pass them, or ur spell does etc. Enemies are lurking in the shadows blah blah blah...
+Dash charge midair zones??? / superdashes???
+
+weapon names:
+Shadowbane
+Bloodreaper
+Darkblade
+Grimhunter
+Nightstalker
+Doombringer
+Soulrender
+Voidwalker
+Deathstroke
+Abyssal Warden

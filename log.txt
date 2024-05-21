@@ -1,0 +1,64 @@
+// Tadeáš Vykopal, 3.B, PVA, Shadow Slayer
+
+Sesh 1 (13/4/24 18:30 - 21:30):
+Downloaded bunch of graphics, enemies and animations. 
+Layed down controls, first ideas, basic mechanics...
+Learned about Tilemaps, fighting mechanics...
+Basics of the script
+
+Sesh 2 (14/4/24 6:30 - 15:00):
+Created my first tile set
+Added all background layers
+Done Input Master for basic movement
+Downloaded and edited the character controller script
+Added camera follow
+Started tiling the environment in intro level on many background layers
+Made the first oneway platform
+Learned about level design
+
+Sesh 3 (14/4/24 19:30 - 21:30):
+Added Fantasy caves TM props 1&2
+Added multiple layers to tilemaps (about to add more)
+Added 2-layer boat + it's colliders (one of the collider serves as a boundary for the player to not leave the intro level)
+Continuing in building the intro level environment (hard af)
+
+Sesh 4 (18/4/2024 18:30 - idk):
+working on the schmoovment
+
+Sesh 5 (21/4/2024 9:00 - 21:00):
+left and right movement - found out that the game actually doesn't need high runAccel/runDeccel because of the combat focus; without it the controls are gonna feel snappier and more responsive
+added groundCheck using BoxRaycast, visualizing probably doesn't work, but I'll skip it since it's not needed for the game to work; may add it later (probably not)
+reworked movement, now I have much more control over each part of movement
+added jumps
+added variable jump height depending on for how long the spacebar is held
+added gravity increase/decrease method, increase when airborne && going downwards
+added working coyote timer, yay!!!
+
+Sesh 6 (22/4/24 19:00 - 21:00)
+Added isJumping and isJumpFalling states
+Added 2 variable gravity multipliers, applying them depending on if player is just falling or falling from a jump
+
+Sesh 6.1 (24/4/24 +-10 mins)
+Brainstorming on the enemy "lurker"
+
+Sesh 7 (1/5/24 14:15 - 19:00)
+Learned how to do animations
+Created character animation script, it could theoretically work for enemies as well
+Added bunch of new movement states
+Added idle animation, had to create a transition into idle state tho
+Added run animation
+Added multiple more animation clips, but they are not working yet :/
+
+Sesh 8 (10/5/24 9:00 - 10:00)
+Learning how to create an enemy AI
+
+Sesh 9 (13/5/24 19:00 - 20:30)
+Creating the first enemy - Giant Scarab
+
+Sesh 10 (19/5/24 10:30 - 12:00)
+Working on the enemy (unsuccessful)
+
+Sesh 11 (21/5/24 16:30 - 21:30)
+The enemy mostly works (with a bug of it flying away)
+Created health script, added flash animation for any gameobject with a sprite
+Added new input for attack, layed down foundations of combat (will have to work on state checks in character controller)
