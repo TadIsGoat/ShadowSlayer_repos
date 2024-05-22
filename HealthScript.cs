@@ -19,9 +19,13 @@ public class HealthScript : MonoBehaviour
         if (currentHealth > 0)
         {
             currentHealth -= damage;
+            Debug.Log("Damage taken: " + damage);
             try
             {
-                characterController.TakeDamage();
+                if (characterController != null)
+                {
+                    characterController.TakeDamage();
+                }
             }
             catch
             {
@@ -37,6 +41,7 @@ public class HealthScript : MonoBehaviour
             }
             catch
             {
+                GetComponent<LurkerScript>().enabled = false;
                 //Create a fade-away animation for enemies/characters without character controller (možná bude fungovat když dostanou character controller script a bude je používat jen tento script a fade-away nebo problikání se vytvoøí v characterAnimatoru) same goes for flash
             }
         }

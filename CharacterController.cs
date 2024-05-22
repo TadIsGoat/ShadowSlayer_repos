@@ -2,6 +2,8 @@
 
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
+
 
 public class CharacterController2D : MonoBehaviour
 {
@@ -44,22 +46,29 @@ public class CharacterController2D : MonoBehaviour
     public bool isRunning = false;
     public bool isGettingDamaged = false;
     public bool isDead = false;
+    public bool isAttacking = false;
     GameObject currentPlatform;
     [HideInInspector] public bool facingLeft;
 
     [Header("Timers")]
-    public float coyoteTimer = 0.5f;
+    public float coyoteTimer = 0.08f;
     [HideInInspector] public float lastOnGroundTime;
 
     [Header("Ground check variables")]
-    public Collider2D groundCheckCollider;
     [SerializeField] private LayerMask ground;
+    public Collider2D groundCheckCollider;
 
     [Header("Combat variables")]
+    [SerializeField] Vector2 attackPoint;
+    public float attackRange = 1.3f;
+    public LayerMask enemyLayer;
+    [SerializeField] private Camera mainCamera;
+    [SerializeField] public float defaultAttackDamage = 20;
 
 
     [Header("Animation variables")]
     public CharacterAnimator characterAnimator;
+    public Animator animator;
     //aren't required, but simplify coding
     const string flash = "flash";
     const string playerAnimIdle = "Player_Idle";
@@ -83,6 +92,7 @@ public class CharacterController2D : MonoBehaviour
     private void Awake()
     {
         originalGravity = rb.gravityScale;
+        attackPoint = transform.position;
     }
 
     public void Update()
@@ -92,6 +102,7 @@ public class CharacterController2D : MonoBehaviour
         lastOnGroundTime -= Time.deltaTime;
 
         #region STATE CHECKS
+        //need a remake into separate methods
 
         //(not only) GROUND CHECK
         float raycastDistance = groundCheckCollider.bounds.extents.y + 0.01f; //raycastDistance is equal to a half of the groundCheckCollider (it is slightly bigger, so it doesn't bug)
@@ -180,7 +191,7 @@ public class CharacterController2D : MonoBehaviour
         {
             characterAnimator.ChangeAnimation(playerAnimIdle);
         }
-        else if (isRunning == true)
+        else if (isRunning == true && isAttacking == false)
         {
             characterAnimator.ChangeAnimation(playerAnimRun);
         }
@@ -229,7 +240,7 @@ public class CharacterController2D : MonoBehaviour
         float movement = speedDif * accelRate; //Calculate force along x-axis to apply to the player
         rb.AddForce(movement * Vector2.right, ForceMode2D.Force); //Convert this to a vector and apply to rigidbody
 
-        //FLIP
+        //CALL FLIP
         if (move < 0 && !facingLeft)
         {
             Flip();
@@ -326,21 +337,90 @@ public class CharacterController2D : MonoBehaviour
     #endregion
 
     #region COMBAT
-
-    public void SwordAttack()
+    //needs to remake into separate script later
+    #region SWORD ATTACK
+    public void SwordAttack(InputAction.CallbackContext context)
     {
-        characterAnimator.ChangeAnimation(playerAnimAttack1);
+        if (!isAttacking && context.started)
+        {
+            isAttacking = true;
+            if (FindMouseWorldPos().x >= transform.position.x && facingLeft == true)
+            {
+                Flip();
+            }
+            else if (FindMouseWorldPos().x < transform.position.x && facingLeft == false)
+            {
+                Flip();
+            }
+
+            characterAnimator.ChangeAnimation(playerAnimAttack1);
+
+            Collider2D[] hit = Physics2D.OverlapCircleAll(FindSwordAttackPoint(), attackRange, enemyLayer);
+
+            foreach (Collider2D enemy in hit)
+            {
+                enemy.GetComponent<HealthScript>().TakeDamage(defaultAttackDamage);
+            }
+        }
+
+        Invoke(nameof(AttackComplete), animator.GetCurrentAnimatorStateInfo(0).length);
+    }
+
+    private void AttackComplete()
+    {
+        isAttacking = false;
+        characterAnimator.ChangeAnimation(playerAnimIdle);
+    }
+
+
+    private Vector2 FindSwordAttackPoint()
+    {
+        if (FindMouseWorldPos().x >= transform.position.x)
+        {
+            attackPoint = new Vector2(transform.position.x + attackRange / 2, transform.position.y);
+            Debug.Log("Attack right");
+        }
+        else if (FindMouseWorldPos().x < transform.position.x)
+        {
+            Debug.Log("Attack left");
+            attackPoint = new Vector2(transform.position.x - attackRange / 2, transform.position.y);
+        }
+        //might add more (up to 8 directions) attack points in the future, but need anims for that
+        return attackPoint;
+    }
+    #endregion
+
+    private Vector3 FindMouseWorldPos()
+    {
+        Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorldPos.z = 0f;
+        return mouseWorldPos;
     }
 
     #endregion
+
+    #region GIZMOS
+    /*
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(groundCheck.position, groundCheckSize);
+    }
+    */
+
+    private void OnDrawGizmosSelected()
+    {
+        try
+        {
+            Gizmos.DrawWireSphere(attackPoint, attackRange);
+        }
+        catch
+        {
+            Debug.Log("Failed to draw attack wire sphere");
+        }
+    }
+    #endregion
 }
 
-/*
-#region GIZMOS
-private void OnDrawGizmosSelected()
-{
-    Gizmos.color = Color.green;
-    Gizmos.DrawWireCube(groundCheck.position, groundCheckSize);
-}
-#endregion
-*/
+
+

@@ -1,10 +1,8 @@
 // Tadeáš Vykopal, 3.B, PVA, Shadow Slayer
 
-using System.Collections;
-using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static UnityEditor.Timeline.TimelinePlaybackControls;
 
 
 public class PlayerInput : MonoBehaviour
@@ -28,7 +26,7 @@ public class PlayerInput : MonoBehaviour
         if (context.started)
         {
             characterController.Jump();
-        } 
+        }
         else if (context.canceled)
         {
             characterController.AdjustGravity("jumpFallIncrease");
@@ -42,9 +40,6 @@ public class PlayerInput : MonoBehaviour
 
     public void SwordAttack(InputAction.CallbackContext context)
     {
-        if(context.started)
-        {
-            characterController.SwordAttack();
-        }
+        characterController.SwordAttack(context);
     }
 }
