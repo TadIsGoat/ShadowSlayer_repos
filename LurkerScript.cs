@@ -7,7 +7,7 @@ public class LurkerScript : MonoBehaviour
     [SerializeField] private GameObject wpR;
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Transform targetPoint;
-    public float speed = 20f;
+    public float speed = 10f;
     public float runAccelAmount = 10;
     public float runDeccelAmount = 10;
     private bool facingLeft;

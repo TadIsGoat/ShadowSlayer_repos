@@ -23,6 +23,7 @@ public class CharacterController2D : MonoBehaviour
     [Space(20f)]
     [SerializeField] private Collider2D characterCollider;
     [SerializeField] private Rigidbody2D rb;
+    Vector2 lockPos;
 
     [Header("Jump variables")]
     public float jumpHeight = 10f;
@@ -42,7 +43,6 @@ public class CharacterController2D : MonoBehaviour
     public bool isJumpFalling = false;
     public bool isFalling = false;
     public bool isIdle = false;
-    public float idleTransitionZone = 1.5f;
     public bool isRunning = false;
     public bool isGettingDamaged = false;
     public bool isDead = false;
@@ -51,8 +51,9 @@ public class CharacterController2D : MonoBehaviour
     [HideInInspector] public bool facingLeft;
 
     [Header("Timers")]
-    public float coyoteTimer = 0.08f;
-    [HideInInspector] public float lastOnGroundTime;
+    [SerializeField] public float idleTransitionZone = 1.5f;
+    [SerializeField] public float coyoteTimer = 0.5f;
+    [SerializeField] public float lastOnGroundTime;
 
     [Header("Ground check variables")]
     [SerializeField] private LayerMask ground;
@@ -83,10 +84,6 @@ public class CharacterController2D : MonoBehaviour
     const string playerAnimAirAttack2 = "Player_AirAttack2";
     const string playerAnimAirAttack3 = "Player_AirAttack3";
     const string playerAnimAirAttack3Loop = "Player_AirAttack3_loop";
-    /*
-    Should use this superthing
-    Invoke("AttackComplete", animator.GetCurrentAnimatorStateInfo(0).length);
-    */
     #endregion
 
     private void Awake()
@@ -100,6 +97,13 @@ public class CharacterController2D : MonoBehaviour
         currentVelocityX = rb.velocity.x; //testing purposes only
         currentGravity = rb.gravityScale; //testing purposes only
         lastOnGroundTime -= Time.deltaTime;
+
+        #region DEATH POSITIONLOCK
+        if (isDead == true && isGrounded == true)
+        {
+            transform.position = lockPos;
+        }
+        #endregion
 
         #region STATE CHECKS
         //need a remake into separate methods
@@ -123,7 +127,7 @@ public class CharacterController2D : MonoBehaviour
         Debug.DrawRay(groundCheckCollider.bounds.center - new Vector3(groundCheckCollider.bounds.extents.x, groundCheckCollider.bounds.extents.y), Vector2.right * (groundCheckCollider.bounds.extents.x * 2f), rayColor, 1, false);
         */
         #endregion
-        //Debug.Log(raycastHit.collider);
+
         if (raycastHit.collider != null)
         {
             isGrounded = true;
@@ -143,7 +147,7 @@ public class CharacterController2D : MonoBehaviour
             isJumpFalling = true;
         }
 
-        if (rb.velocity.y < 0 && isJumpFalling == false)
+        if (rb.velocity.y < 0 && isJumpFalling == false && lastOnGroundTime < 0)
         {
             isFalling = true;
         }
@@ -171,7 +175,7 @@ public class CharacterController2D : MonoBehaviour
 
         #region GRAVITY CHANGES FOR JUMP & JUMP-FALL
         //ENCREASE GRAVITY WHEN FALLING
-        if (rb.velocity.y < 0 && isJumpFalling == false)
+        if (rb.velocity.y < 0 && isJumpFalling == false && isJumping == false)
         {
             AdjustGravity("fallIncrease");
         }
@@ -207,6 +211,10 @@ public class CharacterController2D : MonoBehaviour
         {
             characterAnimator.ChangeAnimation(flash);
             isGettingDamaged = false;
+        }
+        else if (isAttacking == true && isGrounded == false)
+        {
+            characterAnimator.ChangeAnimation(playerAnimAttack1);
         }
         else if (isDead == true)
         {
@@ -253,7 +261,7 @@ public class CharacterController2D : MonoBehaviour
 
     public void Jump()
     {
-        if (lastOnGroundTime == coyoteTimer)
+        if (lastOnGroundTime > 0)
         {
             jumpforce = Mathf.Sqrt(jumpHeight * (Physics2D.gravity.y * rb.gravityScale) * -2) * rb.mass;
             rb.AddForce(Vector2.up * jumpforce, ForceMode2D.Impulse);
@@ -299,6 +307,7 @@ public class CharacterController2D : MonoBehaviour
     {
         isDead = true;
         GetComponent<CharacterController2D>().enabled = false;
+        lockPos = transform.position;
     }
     #endregion
 
@@ -362,8 +371,8 @@ public class CharacterController2D : MonoBehaviour
                 enemy.GetComponent<HealthScript>().TakeDamage(defaultAttackDamage);
             }
         }
-
-        Invoke(nameof(AttackComplete), animator.GetCurrentAnimatorStateInfo(0).length);
+        float duration = animator.GetCurrentAnimatorStateInfo(0).length;
+        Invoke(nameof(AttackComplete), duration);
     }
 
     private void AttackComplete()
@@ -421,6 +430,3 @@ public class CharacterController2D : MonoBehaviour
     }
     #endregion
 }
-
-
-

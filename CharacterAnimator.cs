@@ -3,12 +3,16 @@ using UnityEngine;
 
 public class CharacterAnimator : MonoBehaviour
 {
-    private Animator animator;
+    [SerializeField] private Animator animator;
     private string currentAnim;
-    private SpriteRenderer spriteRend;
-    public float flashDuration = 1.0f;
-    public Color flashColor = Color.white;
+    [SerializeField] private SpriteRenderer spriteRend;
+    [SerializeField] public float flashDuration = 1.0f;
+    [SerializeField] public Color flashColor = Color.white;
     protected Color originalColor;
+    private float fadeTimer = 0f;
+    private float alpha;
+    public bool isDead = false;
+    [SerializeField] float fadeDuration = 3f;
 
     private void Awake()
     {
@@ -16,17 +20,43 @@ public class CharacterAnimator : MonoBehaviour
         originalColor = spriteRend.color;
         animator = GetComponent<Animator>();
     }
+    void Update()
+    {
+        if (isDead == true)
+        {
+            fadeTimer += Time.deltaTime;
+            alpha = Mathf.Lerp(1f, 0f, fadeTimer / fadeDuration);
+            spriteRend.color = new Color(originalColor.r, originalColor.g, originalColor.b, alpha);
+
+            if (fadeTimer >= fadeDuration)
+            {
+                Destroy(gameObject);
+            }
+        }
+    }
+
+    public void JustDied()
+    {
+        isDead = true;
+    }
 
     public void ChangeAnimation(string newAnim)
     {
-        if (currentAnim != newAnim && newAnim == "flash")
+        if (currentAnim != "Player_Die")
         {
-            StartCoroutine(Flash(spriteRend, flashDuration, flashColor));
-        }
-        else if (currentAnim != newAnim)
+            if (newAnim == "flash")
+            {
+                StartCoroutine(Flash(spriteRend, flashDuration, flashColor));
+            }
+            else if (currentAnim != newAnim)
+            {
+                animator.Play(newAnim);
+                currentAnim = newAnim;
+            }
+        } 
+        else
         {
-            animator.Play(newAnim);
-            currentAnim = newAnim;
+            JustDied();
         }
     }
 
