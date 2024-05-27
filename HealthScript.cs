@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class HealthScript : MonoBehaviour
@@ -15,19 +17,21 @@ public class HealthScript : MonoBehaviour
         currentHealth = maxHealth;
     }
 
-    public void TakeDamage(float damage)
+    public void TakeHit(float damage, float knockback)
     {
         currentHealth = Mathf.Clamp(currentHealth - damage, 0, maxHealth);
+        Vector2 knockbackForce = knockback * Vector2.right;
+        knockbackForce.y = knockback / 10;
+        rb.AddForce(knockbackForce, ForceMode2D.Impulse);
 
         if (currentHealth > 0)
         {
             currentHealth -= damage;
-            Debug.Log("Damage taken: " + damage);
             try
             {
                 if (characterController != null)
                 {
-                    characterController.TakeDamage();
+                    characterController.isGettingDamaged = true;
                 }
             }
             catch
@@ -40,11 +44,11 @@ public class HealthScript : MonoBehaviour
             currentHealth = 0;
             try
             {
-                characterController.Die();
+                StartCoroutine(characterController.Die(knockback));
             }
             catch
             {
-                Die();
+                StartCoroutine(Die(knockback));
             }
         }
     }
@@ -58,18 +62,33 @@ public class HealthScript : MonoBehaviour
         }
     }
 
-    public void Die() //for enemies
+    public IEnumerator Die(float direction) //for enemies
     {
-        GetComponent<LurkerScript>().enabled = false;
         rb.constraints &= ~RigidbodyConstraints2D.FreezeRotation;
         col.sharedMaterial = null;
-        Invoke(nameof(WhitherAway), deathDuration);
 
-        //Create a fade-away animation for enemies/characters without character controller (možná bude fungovat když dostanou character controller script a bude je používat jen tento script a fade-away nebo problikání se vytvoøí v characterAnimatoru) same goes for flash
+        yield return new WaitUntil(() => GetVelocity(direction));
+
+        GetComponent<LurkerScript>().enabled = false;
+        GetComponent<LurkerScript>().colDis = true;
+        yield return new WaitForSeconds(deathDuration);
+
+        characterAnimator.JustDied();
     }
 
-    public void WhitherAway()
+    public bool GetVelocity(float direction)
     {
-        characterAnimator.JustDied();
+        if (direction < 0 && rb.velocity.x >= direction / 4)
+        {
+            return true;
+        }
+        else if (direction > 0 && rb.velocity.x <= direction / 4)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

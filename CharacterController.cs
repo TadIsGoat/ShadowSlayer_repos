@@ -14,8 +14,8 @@ public class CharacterController2D : MonoBehaviour
 
     [Header("Movement variables")]
     public bool doConserveMomentum = true;
-    public float maxRunSpeed = 20f;
-    public float lerpAmount = 1; //whatever that is (it works tho)
+    [SerializeField] public float maxRunSpeed = 15f;
+    [HideInInspector] public float lerpAmount = 1; //whatever that is (it works tho)
     public float runAccelAmount = 10;
     public float runDeccelAmount = 5;
     [Range(0f, 1)] public float accelInAir = 1;
@@ -47,13 +47,17 @@ public class CharacterController2D : MonoBehaviour
     public bool isGettingDamaged = false;
     public bool isDead = false;
     public bool isAttacking = false;
+    public bool isChargingAttack = false;
+    public bool isPosLocked = false;
     GameObject currentPlatform;
     [HideInInspector] public bool facingLeft;
 
     [Header("Timers")]
     [SerializeField] public float idleTransitionZone = 1.5f;
-    [SerializeField] public float coyoteTimer = 0.5f;
+    [SerializeField] public float coyoteTimer = 0.1f;
+    [SerializeField] public float comboTimer = 0.2f;
     [SerializeField] public float lastOnGroundTime;
+    [SerializeField] public float lastAttackedTime;
 
     [Header("Ground check variables")]
     [SerializeField] private LayerMask ground;
@@ -61,10 +65,13 @@ public class CharacterController2D : MonoBehaviour
 
     [Header("Combat variables")]
     [SerializeField] Vector2 attackPoint;
+    public int combo = 1;
     public float attackRange = 1.3f;
+    public float attackChargeDuration = 1f;
     public LayerMask enemyLayer;
     [SerializeField] private Camera mainCamera;
     [SerializeField] public float defaultAttackDamage = 20;
+    [SerializeField] public float defaultAttackKnockback = 20;
 
 
     [Header("Animation variables")]
@@ -84,6 +91,7 @@ public class CharacterController2D : MonoBehaviour
     const string playerAnimAirAttack2 = "Player_AirAttack2";
     const string playerAnimAirAttack3 = "Player_AirAttack3";
     const string playerAnimAirAttack3Loop = "Player_AirAttack3_loop";
+    const string playerAnimSwordDraw = "Player_SwordDraw";
     #endregion
 
     private void Awake()
@@ -97,9 +105,10 @@ public class CharacterController2D : MonoBehaviour
         currentVelocityX = rb.velocity.x; //testing purposes only
         currentGravity = rb.gravityScale; //testing purposes only
         lastOnGroundTime -= Time.deltaTime;
+        lastAttackedTime -= Time.deltaTime;
 
         #region DEATH POSITIONLOCK
-        if (isDead == true && isGrounded == true)
+        if ((isDead == true || isPosLocked == true) && isGrounded == true)
         {
             transform.position = lockPos;
         }
@@ -170,12 +179,11 @@ public class CharacterController2D : MonoBehaviour
             isIdle = false;
             isRunning = false;
         }
-
         #endregion
 
         #region GRAVITY CHANGES FOR JUMP & JUMP-FALL
         //ENCREASE GRAVITY WHEN FALLING
-        if (rb.velocity.y < 0 && isJumpFalling == false && isJumping == false)
+        if (rb.velocity.y < 0 && isJumpFalling == false && isJumping == false && lastOnGroundTime < 0)
         {
             AdjustGravity("fallIncrease");
         }
@@ -191,34 +199,74 @@ public class CharacterController2D : MonoBehaviour
         #endregion
 
         #region ANIMATION HANDLELER
-        if (isIdle == true)
-        {
-            characterAnimator.ChangeAnimation(playerAnimIdle);
-        }
-        else if (isRunning == true && isAttacking == false)
-        {
-            characterAnimator.ChangeAnimation(playerAnimRun);
-        }
-        else if (isJumping == true)
-        {
-            characterAnimator.ChangeAnimation(playerAnimJump);
-        }
-        else if (isJumpFalling == true || isFalling == true)
-        {
-            characterAnimator.ChangeAnimation(playerAnimFall);
-        }
-        else if (isGettingDamaged == true)
-        {
-            characterAnimator.ChangeAnimation(flash);
-            isGettingDamaged = false;
-        }
-        else if (isAttacking == true && isGrounded == false)
-        {
-            characterAnimator.ChangeAnimation(playerAnimAttack1);
-        }
-        else if (isDead == true)
+        if (isDead == true)
         {
             characterAnimator.ChangeAnimation(playerAnimDie);
+        }
+        else
+        {
+            if (isGettingDamaged == true)
+            {
+                characterAnimator.ChangeAnimation(flash);
+                isGettingDamaged = false;
+            }
+            else if (isAttacking == false)
+            {
+                if (isIdle == true)
+                {
+                    characterAnimator.ChangeAnimation(playerAnimIdle);
+                }
+                else if (isRunning == true && isAttacking == false)
+                {
+                    characterAnimator.ChangeAnimation(playerAnimRun);
+                }
+                else if (isJumping == true)
+                {
+                    characterAnimator.ChangeAnimation(playerAnimJump);
+                }
+                else if (isJumpFalling == true || isFalling == true)
+                {
+                    characterAnimator.ChangeAnimation(playerAnimFall);
+                }
+            }
+            else if (isChargingAttack == true && isJumping == false && isJumpFalling == false)
+            {
+                characterAnimator.ChangeAnimation(playerAnimSwordDraw);
+            }
+            else if (isAttacking == true && isJumping == false && isJumpFalling == false)
+            {
+                if (combo == 1)
+                {
+                    characterAnimator.ChangeAnimation(playerAnimAttack1);
+                }
+                else if (combo == 2)
+                {
+                    characterAnimator.ChangeAnimation(playerAnimAttack2);
+                }
+                else if (combo == 3)
+                {
+                    characterAnimator.ChangeAnimation(playerAnimAttack3);
+                }
+            }
+            else if (isAttacking == true && (isJumping == true || isJumpFalling == true || isFalling == true || isGrounded == false))
+            {
+                if (combo == 1)
+                {
+                    characterAnimator.ChangeAnimation(playerAnimAirAttack1);
+                }
+                else if (combo == 2)
+                {
+                    characterAnimator.ChangeAnimation(playerAnimAirAttack2);
+                }
+                else if (combo == 3)
+                {
+                    characterAnimator.ChangeAnimation(playerAnimAirAttack3Loop);
+                }
+                else
+                {
+                    characterAnimator.ChangeAnimation(playerAnimAirAttack3);
+                }
+            }
         }
         #endregion
     }
@@ -295,18 +343,14 @@ public class CharacterController2D : MonoBehaviour
         facingLeft = !facingLeft;
         Vector3 scale = transform.localScale;
         scale.x *= -1;
+        defaultAttackKnockback *= -1;
         transform.localScale = scale;
     }
 
-    public void TakeDamage()
+    public IEnumerator Die(float direction)
     {
-        isGettingDamaged = true;
-    }
-
-    public void Die()
-    {
+        yield return new WaitUntil(() => GetComponent<HealthScript>().GetVelocity(direction));
         isDead = true;
-        GetComponent<CharacterController2D>().enabled = false;
         lockPos = transform.position;
     }
     #endregion
@@ -348,11 +392,22 @@ public class CharacterController2D : MonoBehaviour
     #region COMBAT
     //needs to remake into separate script later
     #region SWORD ATTACK
-    public void SwordAttack(InputAction.CallbackContext context)
+    public IEnumerator SwordAttack()
     {
-        if (!isAttacking && context.started)
+        if (!isAttacking)
         {
             isAttacking = true;
+            if (lastAttackedTime > 0 && combo < 3)
+            {
+                combo++;
+            }
+            else
+            {
+                combo = 1;
+            }
+
+            yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length / 3);
+
             if (FindMouseWorldPos().x >= transform.position.x && facingLeft == true)
             {
                 Flip();
@@ -362,42 +417,72 @@ public class CharacterController2D : MonoBehaviour
                 Flip();
             }
 
-            characterAnimator.ChangeAnimation(playerAnimAttack1);
-
             Collider2D[] hit = Physics2D.OverlapCircleAll(FindSwordAttackPoint(), attackRange, enemyLayer);
 
             foreach (Collider2D enemy in hit)
             {
-                enemy.GetComponent<HealthScript>().TakeDamage(defaultAttackDamage);
+                enemy.GetComponent<HealthScript>().TakeHit(defaultAttackDamage / 2, defaultAttackKnockback); //damage is divided by 2 cuz it is always dealt twice for some unknown reason
             }
+
+            yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length / 3 * 2);
+
+            isAttacking = false;
+            lastAttackedTime = comboTimer;
         }
-        float duration = animator.GetCurrentAnimatorStateInfo(0).length;
-        Invoke(nameof(AttackComplete), duration);
     }
+    #endregion
 
-    private void AttackComplete()
+    #region CHARGED ATTACK
+
+    public IEnumerator ChargedAttack(InputAction.CallbackContext context)
     {
-        isAttacking = false;
-        characterAnimator.ChangeAnimation(playerAnimIdle);
+        if (FindMouseWorldPos().x >= transform.position.x && facingLeft == true)
+        {
+            Flip();
+        }
+        else if (FindMouseWorldPos().x < transform.position.x && facingLeft == false)
+        {
+            Flip();
+        }
+
+        isPosLocked = true;
+        isChargingAttack = true;
+
+        yield return new WaitForSeconds((float)context.duration);
+
+        isPosLocked = false;
+        isChargingAttack = false;
+
+        if (context.duration < attackChargeDuration)
+        {
+            StartCoroutine(SwordAttack());
+        }
+        else if (context.duration >= attackChargeDuration)
+        {
+
+        }
     }
 
+    #endregion
+
+
+    #region BOW ATTACK
+    //coming soon
+    #endregion
 
     private Vector2 FindSwordAttackPoint()
     {
         if (FindMouseWorldPos().x >= transform.position.x)
         {
             attackPoint = new Vector2(transform.position.x + attackRange / 2, transform.position.y);
-            Debug.Log("Attack right");
         }
         else if (FindMouseWorldPos().x < transform.position.x)
         {
-            Debug.Log("Attack left");
             attackPoint = new Vector2(transform.position.x - attackRange / 2, transform.position.y);
         }
         //might add more (up to 8 directions) attack points in the future, but need anims for that
-        return attackPoint;
+        return attackPoint; //attack point = direction of the attack
     }
-    #endregion
 
     private Vector3 FindMouseWorldPos()
     {

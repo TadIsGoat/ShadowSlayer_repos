@@ -38,9 +38,6 @@ Sesh 6 (22/4/24 19:00 - 21:00)
 Added isJumping and isJumpFalling states
 Added 2 variable gravity multipliers, applying them depending on if player is just falling or falling from a jump
 
-Sesh 6.1 (24/4/24 +-10 mins)
-Brainstorming on the enemy "lurker"
-
 Sesh 7 (1/5/24 14:15 - 19:00)
 Learned how to do animations
 Created character animation script, it could theoretically work for enemies as well
@@ -69,3 +66,27 @@ Working on the combat & health system
 Sesh 13 (23/5/24 17:45 - 21:45)
 Enemy death "Whither away" animation created and working
 More work on the combat system and anims
+
+Sesh 14 (25/5/24 8:45 - 9:45)
+Figured out the order of the animations and how to setup the animations to override each other
+
+Sesh 15 (25/5/24 13:00 - 14:00)
+Perfecting the combat, health and anims
+
+Sesh 16 (25/5/24 16:45 - 20:30)
+probably fixed the flying away enemy issue
+learned how to work with coroutines, implemented them, attacks and anims have much better timing
+implemented knockback
+documentaion bleeeeeeeeeeeh
+
+Sesh 17 (26/5/24 9:00 - 14:00)
+documentaion bleeeeeeeeeeeh
+Working player death anim
+Working healthbar
+First canvas created
+
+Sesh 18 (27/5/24 18:45)
+Attack Anim combos done - first try hihi
+Edited knockback force
+Created new anim clip - sword draw
+Started the charged attack method, isnt working tho

@@ -1,6 +1,5 @@
 // Tadeáš Vykopal, 3.B, PVA, Shadow Slayer
 
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -40,6 +39,14 @@ public class PlayerInput : MonoBehaviour
 
     public void SwordAttack(InputAction.CallbackContext context)
     {
-        characterController.SwordAttack(context);
+        if (context.started)
+        {
+            StartCoroutine(characterController.SwordAttack());
+        }
+    }
+
+    public void ChargedAttack(InputAction.CallbackContext context)
+    {
+        StartCoroutine(characterController.ChargedAttack(context));
     }
 }

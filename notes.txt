@@ -19,17 +19,18 @@ acceleration: https://www.youtube.com/watch?v=KKGdDBFcu0Q
 overall enemies: https://www.youtube.com/watch?v=d002CljR-KU
 gif converter: https://tool.koalahollow.com/gifconverter
 melee combat: https://www.youtube.com/watch?v=sPiVz1k-fEs
+jumps/walljumps!!!: https://www.youtube.com/watch?v=2S3g8CgBG1g
+health/healthbar: https://www.youtube.com/watch?v=yxzg8jswZ8A&list=PLgOEwFbvGm5o8hayFB6skAfa8Z-mw4dPV&index=7
 
 will be used:
-jumps/walljumps!!!: https://www.youtube.com/watch?v=2S3g8CgBG1g
 save/load system: https://www.youtube.com/watch?v=XOjd_qU2Ido
-https://www.youtube.com/watch?v=yxzg8jswZ8A&list=PLgOEwFbvGm5o8hayFB6skAfa8Z-mw4dPV&index=8
 overall enemies: https://www.youtube.com/watch?v=d002CljR-KU
 
 should be used:
 bettergame steps: https://www.youtube.com/watch?v=3y-ldI_xWiI
 excelent platformer: https://www.youtube.com/watch?v=Oet5jqoX14E
 adaptive difficulty: https://www.youtube.com/watch?v=rI7UxiEZbA4&list=PLqPLyUreLV8C59RyVDRESJtefspPi-eXq&index=45
+coloooooor: https://www.youtube.com/watch?v=jqUoh69Aawc
 
 it exists, whatever:
 input system: https://www.youtube.com/watch?v=Pzd8NhcRzVo
@@ -37,11 +38,11 @@ input system: https://www.youtube.com/watch?v=Pzd8NhcRzVo
 
 ========================= BUGS & MISTAKES THAT NEED FIX =========================
 - change camera from projection to perspective //ekšuly hard af
-- sometimes jump is doubled when jumping while running on a slope
+- sometimes jump is doubled
 - tilemap hitbox is sloppy
 - jump is doubled when jumping through a one-way platform
 - camera focusing into wrong places
-- enemy is bugging
+- enemy is bugging/flying away/ignoring wps
 
 ========================= SCHMOOVEMENT =========================
 m&k:

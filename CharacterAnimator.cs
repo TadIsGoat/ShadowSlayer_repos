@@ -53,7 +53,12 @@ public class CharacterAnimator : MonoBehaviour
                 animator.Play(newAnim);
                 currentAnim = newAnim;
             }
-        } 
+        }
+        else if (currentAnim == "Player_Die" && currentAnim != newAnim)
+        {
+            animator.Play(newAnim);
+            currentAnim = newAnim;
+        }
         else
         {
             JustDied();
