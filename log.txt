@@ -90,3 +90,15 @@ Attack Anim combos done - first try hihi
 Edited knockback force
 Created new anim clip - sword draw
 Started the charged attack method, isnt working tho
+
+Sesh 19 (30/5/24 19:15 - 22:00)
+Messing with attack code, nothing works
+
+Sesh 20 (21/5/24 16:15 - 18:15)
+Charge attack works!!!
+
+Sesh 21 (1/6/24 14:15 - 23:15)
+Created the tilemap for intro level
+Changed backgrounds
+Added lights
+Finished intro

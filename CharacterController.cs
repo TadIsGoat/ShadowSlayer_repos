@@ -2,7 +2,6 @@
 
 using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 
 public class CharacterController2D : MonoBehaviour
@@ -23,12 +22,12 @@ public class CharacterController2D : MonoBehaviour
     [Space(20f)]
     [SerializeField] private Collider2D characterCollider;
     [SerializeField] private Rigidbody2D rb;
-    Vector2 lockPos;
+    private Vector2 lockPos;
 
     [Header("Jump variables")]
     public float jumpHeight = 10f;
     public int doubleJumps = 3; //not currently in use
-    [HideInInspector] public float jumpforce = 1.0f; //is calculated automatically depending on jumpHeight
+    [HideInInspector] private float jumpforce = 1.0f; //is calculated automatically depending on jumpHeight
 
     [Header("Gravity variables")]
     public float fallGravityMult = 1.8f;
@@ -48,8 +47,9 @@ public class CharacterController2D : MonoBehaviour
     public bool isDead = false;
     public bool isAttacking = false;
     public bool isChargingAttack = false;
+    public bool isChargeAttacking = false;
     public bool isPosLocked = false;
-    GameObject currentPlatform;
+    private GameObject currentPlatform;
     [HideInInspector] public bool facingLeft;
 
     [Header("Timers")]
@@ -66,12 +66,14 @@ public class CharacterController2D : MonoBehaviour
     [Header("Combat variables")]
     [SerializeField] Vector2 attackPoint;
     public int combo = 1;
-    public float attackRange = 1.3f;
-    public float attackChargeDuration = 1f;
+    public float attackRange = 2f;
     public LayerMask enemyLayer;
+    public LayerMask destroyableLayer;
     [SerializeField] private Camera mainCamera;
     [SerializeField] public float defaultAttackDamage = 20;
     [SerializeField] public float defaultAttackKnockback = 20;
+    [SerializeField] public float defaultChargedAttackSpeed = 40;
+    [SerializeField] public float defaultChargedAttackDistance = 10f;
 
 
     [Header("Animation variables")]
@@ -106,13 +108,6 @@ public class CharacterController2D : MonoBehaviour
         currentGravity = rb.gravityScale; //testing purposes only
         lastOnGroundTime -= Time.deltaTime;
         lastAttackedTime -= Time.deltaTime;
-
-        #region DEATH POSITIONLOCK
-        if ((isDead == true || isPosLocked == true) && isGrounded == true)
-        {
-            transform.position = lockPos;
-        }
-        #endregion
 
         #region STATE CHECKS
         //need a remake into separate methods
@@ -181,6 +176,13 @@ public class CharacterController2D : MonoBehaviour
         }
         #endregion
 
+        #region POSITIONLOCK
+        if (isPosLocked == true && isGrounded == true)
+        {
+            transform.position = lockPos;
+        }
+        #endregion
+
         #region GRAVITY CHANGES FOR JUMP & JUMP-FALL
         //ENCREASE GRAVITY WHEN FALLING
         if (rb.velocity.y < 0 && isJumpFalling == false && isJumping == false && lastOnGroundTime < 0)
@@ -210,7 +212,7 @@ public class CharacterController2D : MonoBehaviour
                 characterAnimator.ChangeAnimation(flash);
                 isGettingDamaged = false;
             }
-            else if (isAttacking == false)
+            else if (isAttacking == false && isChargeAttacking == false && isChargingAttack == false)
             {
                 if (isIdle == true)
                 {
@@ -262,10 +264,14 @@ public class CharacterController2D : MonoBehaviour
                 {
                     characterAnimator.ChangeAnimation(playerAnimAirAttack3Loop);
                 }
-                else
-                {
-                    characterAnimator.ChangeAnimation(playerAnimAirAttack3);
-                }
+            }
+            else if (isChargingAttack == true)
+            {
+                characterAnimator.ChangeAnimation(playerAnimSwordDraw);
+            }
+            else if (isChargeAttacking == true)
+            {
+                characterAnimator.ChangeAnimation(playerAnimAirAttack3);
             }
         }
         #endregion
@@ -309,7 +315,7 @@ public class CharacterController2D : MonoBehaviour
 
     public void Jump()
     {
-        if (lastOnGroundTime > 0)
+        if (lastOnGroundTime > 0 && isPosLocked == false)
         {
             jumpforce = Mathf.Sqrt(jumpHeight * (Physics2D.gravity.y * rb.gravityScale) * -2) * rb.mass;
             rb.AddForce(Vector2.up * jumpforce, ForceMode2D.Impulse);
@@ -351,6 +357,7 @@ public class CharacterController2D : MonoBehaviour
     {
         yield return new WaitUntil(() => GetComponent<HealthScript>().GetVelocity(direction));
         isDead = true;
+        isPosLocked = true;
         lockPos = transform.position;
     }
     #endregion
@@ -391,12 +398,23 @@ public class CharacterController2D : MonoBehaviour
 
     #region COMBAT
     //needs to remake into separate script later
+
     #region SWORD ATTACK
     public IEnumerator SwordAttack()
     {
         if (!isAttacking)
         {
+            if (FindMouseWorldPos().x >= transform.position.x && facingLeft == true)
+            {
+                Flip();
+            }
+            else if (FindMouseWorldPos().x < transform.position.x && facingLeft == false)
+            {
+                Flip();
+            }
+
             isAttacking = true;
+
             if (lastAttackedTime > 0 && combo < 3)
             {
                 combo++;
@@ -407,15 +425,6 @@ public class CharacterController2D : MonoBehaviour
             }
 
             yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length / 3);
-
-            if (FindMouseWorldPos().x >= transform.position.x && facingLeft == true)
-            {
-                Flip();
-            }
-            else if (FindMouseWorldPos().x < transform.position.x && facingLeft == false)
-            {
-                Flip();
-            }
 
             Collider2D[] hit = Physics2D.OverlapCircleAll(FindSwordAttackPoint(), attackRange, enemyLayer);
 
@@ -434,41 +443,67 @@ public class CharacterController2D : MonoBehaviour
 
     #region CHARGED ATTACK
 
-    public IEnumerator ChargedAttack(InputAction.CallbackContext context)
+    public IEnumerator ChargedAttack()
     {
-        if (FindMouseWorldPos().x >= transform.position.x && facingLeft == true)
+        if (isGrounded == true)
         {
-            Flip();
-        }
-        else if (FindMouseWorldPos().x < transform.position.x && facingLeft == false)
-        {
-            Flip();
-        }
+            if (FindMouseWorldPos().x >= transform.position.x && facingLeft == true)
+            {
+                Flip();
+            }
+            else if (FindMouseWorldPos().x < transform.position.x && facingLeft == false)
+            {
+                Flip();
+            }
 
-        isPosLocked = true;
-        isChargingAttack = true;
+            lockPos = transform.position;
+            isPosLocked = true;
+            isChargingAttack = true;
+            Vector2 chargedAttackPos = transform.position;
 
-        yield return new WaitForSeconds((float)context.duration);
+            yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
 
-        isPosLocked = false;
-        isChargingAttack = false;
+            isPosLocked = false;
+            isChargingAttack = false;
+            isChargeAttacking = true;
 
-        if (context.duration < attackChargeDuration)
-        {
-            StartCoroutine(SwordAttack());
-        }
-        else if (context.duration >= attackChargeDuration)
-        {
+            if (facingLeft == true)
+            {
+                rb.AddForce(defaultChargedAttackSpeed * Vector2.left, ForceMode2D.Impulse);
+                yield return new WaitUntil(() => transform.position.x < chargedAttackPos.x - defaultChargedAttackDistance || rb.velocity == Vector2.zero);
+            }
+            else
+            {
+                rb.AddForce(defaultChargedAttackSpeed * Vector2.right, ForceMode2D.Impulse);
+                yield return new WaitUntil(() => transform.position.x > chargedAttackPos.x + defaultChargedAttackDistance || rb.velocity == Vector2.zero);
+            }
 
+            rb.velocity = Vector2.zero;
+            Collider2D[] hit = Physics2D.OverlapCircleAll(FindSwordAttackPoint(), attackRange, enemyLayer + destroyableLayer);
+
+            foreach (Collider2D enemy in hit)
+            {
+                try
+                {
+                    enemy.GetComponent<HealthScript>().TakeHit(defaultAttackDamage / 2 * 2, defaultAttackKnockback * 2); //damage is divided by 2 cuz it is always dealt twice for some unknown reason
+                }
+                catch
+                {
+                    Debug.Log("The hit object doesnt have a health script");
+                    if (enemy.CompareTag("BreakableTag"))
+                    {
+                        Destroy(enemy.gameObject);
+                    }
+                }
+            }
+            yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+
+            isChargeAttacking = false;
         }
     }
 
     #endregion
 
-
-    #region BOW ATTACK
-    //coming soon
-    #endregion
 
     private Vector2 FindSwordAttackPoint()
     {
@@ -515,3 +550,42 @@ public class CharacterController2D : MonoBehaviour
     }
     #endregion
 }
+
+/* the failed dual attack system
+
+ if (isHoldingButton == true)
+        {
+            buttonHoldTime += Time.deltaTime;
+        }
+        else
+        {
+            buttonHoldTime = 0;
+            chargedAttackPhase2Command = false;
+        }
+        
+        if (buttonHoldTime > 0 && buttonHoldTime <= 0.15)
+        {
+            swordAttackCommand = true;
+        }
+        else if (buttonHoldTime > 0.15 && buttonHoldTime <= 0.15 + attackChargeDuration)
+        {
+            swordAttackCommand = false;
+            chargedAttackPhase1Command = true;
+        }
+        else if (buttonHoldTime > 0.15 + attackChargeDuration)
+        {
+            chargedAttackPhase1Command = false;
+            chargedAttackPhase2Command = true;
+        }
+
+        if (swordAttackCommand == true)
+        {
+            StartCoroutine(SwordAttack());
+        } 
+        else if (chargedAttackPhase1Command == true)
+        {
+            ChargedAttackPhase1();
+        }
+
+
+*/

@@ -3,7 +3,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
 public class PlayerInput : MonoBehaviour
 {
     public CharacterController2D characterController;
@@ -47,6 +46,6 @@ public class PlayerInput : MonoBehaviour
 
     public void ChargedAttack(InputAction.CallbackContext context)
     {
-        StartCoroutine(characterController.ChargedAttack(context));
+        StartCoroutine(characterController.ChargedAttack());
     }
 }

@@ -21,6 +21,7 @@ gif converter: https://tool.koalahollow.com/gifconverter
 melee combat: https://www.youtube.com/watch?v=sPiVz1k-fEs
 jumps/walljumps!!!: https://www.youtube.com/watch?v=2S3g8CgBG1g
 health/healthbar: https://www.youtube.com/watch?v=yxzg8jswZ8A&list=PLgOEwFbvGm5o8hayFB6skAfa8Z-mw4dPV&index=7
+lights: https://www.youtube.com/watch?v=1h-hSlffawM
 
 will be used:
 save/load system: https://www.youtube.com/watch?v=XOjd_qU2Ido
